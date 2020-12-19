@@ -32,13 +32,14 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-const WeatherCard = (props) => {
+//NOTE: separate the CardHeader component, CardContent Component into their own separate components, take care of all the props required.
+
+const WeatherCard = props => {
     const classes = useStyles();
     const humidity = "wi wi-humidity";
     const strongWind = "wi wi-strong-wind";
     const { currentWeather, forecast, icon, recommendation } = props;
 
-    //NOTE: on line 47 as we can have any possible JS thing inside curly brackets, we can pass a new component to subheader like that
     return (
         <Card className={classes.card}>
             <CardHeader
