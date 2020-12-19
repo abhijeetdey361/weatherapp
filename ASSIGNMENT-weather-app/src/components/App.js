@@ -79,20 +79,7 @@ const getForecast = (city) =>
         });
 
 //NOTE: get the place data from latitude & longitude using google geocode API
-const getLocation = (lat, long) => 
-    fetch (
-        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${long}&key=${process.env.REACT_APP_GOOGLE_API_KEY}`
-    )
-    .then(res => handleResponse(res))
-    .then(result => {
-        if (Object.entries(result).length) {
-            if (result && result.status === 'REQUEST_DENIED') {
-                throw new Error(result.error_message);
-            } else {
-                return result;
-            }
-        }
-    });
+
 
 const theme = createMuiTheme({
     typography: {
@@ -115,7 +102,7 @@ const theme = createMuiTheme({
 });
 
 const App = () => {
-    const [city, setCity] = useState("Ranchi");
+    const [city, setCity] = useState();
     const [error, setError] = useState(null);
     const [currentWeather, setCurrentWeather] = useState(null);
     const [forecast, setForecast] = useState([]);
@@ -141,10 +128,35 @@ const App = () => {
             //NOTE: call the getLocation(latitude, longitude);
             //NOTE: in getLocation.then set the city using `setCity(data.results[0].address_components[2].long_name)` exactly as it is & setError(null)
             //NOTE: in getLocation.catch set the error using setError(err.message)
+            navigator.geolocation.getCurrentPosition(function(position) {
+                let lat = position.coords.latitude;
+                let long = position.coords.longitude;
+                getLocation(lat,long);
+            });
         } else {
             setError("Geolocation is not supported by this browser.");
         }
     }, [city]);
+
+    const getLocation = (lat, long) => 
+    fetch (
+        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${long}&key=${process.env.REACT_APP_GOOGLE_API_KEY}`
+    )
+    .then(res => handleResponse(res))
+    .then(result => {
+        if (Object.entries(result).length) {
+            if (result && result.status === 'REQUEST_DENIED') {
+                throw new Error(result.error_message);
+            } else {
+                return result;
+            }
+        }
+    })
+    .then((data) => {
+        setCity(data.results[0].address_components[2].long_name);
+        setError(null);
+    })
+    .catch((err) => setError(err.message));
 
     if (
         (currentWeather && Object.keys(currentWeather).length) ||
